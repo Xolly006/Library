@@ -2,19 +2,21 @@
 #include <stdlib.h>
 #include "bibliotheque.h"
 #include <string.h>
-void afficher_menu(){
+//menu prncipal de la bibliothéque.
+void  afficher_menu(){
+	int options;
 	printf("Bienvenu veuillez choisir l'option qui vous plait : 1-Ajouter un livre \n 2-Afficher un livre \n 3-Rechercher un livre \n 4-Quitter");
-	while (true){
-		switch (int options){
+	scanf("%d",&options);
+		switch (options){
 			case 1:
 			printf(":::chargement...:::");
-			break 
+			break ;
 			case 2:
 			printf("très bien ,quel livre voulez-vous afficher");
-			break 
+			break ;
 			case 3:
 			printf("okay!recherchons ce livre");
-			break 
+			break;
 			case 4: 
 			printf("à la prochaine");
 			break;
@@ -22,21 +24,39 @@ void afficher_menu(){
 			printf("veuillez choisir une option reelle") ;
 		}
 }
-}
-void saisir_livre(Livre *book){
+//fonction pour créer un livre à ajouter à la bibliohèque 
+Livre  saisir_livre(){
+	Livre book;
 	printf("veuillez renseignez les caracteristiques du livre");
 	printf("identifiant du livre");
-	scanf("%d",&(*book).id);
+	scanf("%d",&(book).id);
 	printf("titre du livre");
-	scanf("%c",&(*book).titre);
+	scanf("%s",(book).titre);
 	printf("nom de l'auteur");
-	scanf("%c",&(*book).auteur);
+	scanf("%s",(book).auteur);
 	printf("année de parution");
-	scanf("%d",&(*book).annee);
-	*book={(*book).id;(*book).titre;(*book).auteur;*(book).annee};
+	scanf("%d",&(book).annee);
+	return book;
+}
+void addBookToLibrary(booksLibrary*Bibliotheque){
+	if(Bibliotheque->nb_books+1<=Bibliotheque->max_books){
+		Livre book=saisir_livre();
+		for (int i=0;i<Bibliotheque->nb_books;i++){
+			if(book.id==Bibliotheque->Library[i].id){
+				printf("ce livre existe déjà!,id déjà existant"); //eviter la duplication d'id;
+				return;
+			}
+		}
+		
+		Bibliotheque->Library[Bibliotheque->nb_books]=book;
+		Bibliotheque->nb_books+=1;
+	}
+    else{
+		printf("capacité maximale atteinte impossible d'ajouter un nouveau livre.");	
+	}
 }
 	
-	
+
 				
 		
 	
