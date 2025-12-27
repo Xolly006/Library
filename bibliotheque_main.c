@@ -1,10 +1,22 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "bibliotheque.h"
 #include <string.h>
-#define max_livres 100 // nombre maximal de livres dans la bibliotheque 
-int main(){
-	int nbook_actual=0; //nombre de livre actuel
-	Livre Bibliotheque[max_livres];
-	
+#include <unistd.h>
+#include "bibliotheque.h"
+int main() {
+    booksLibrary Bibliotheque;
+    printf("Nombre maximal e livre dans la bibliothèque");
+	scanf("%d",&Bibliotheque.max_books);
+    Bibliotheque.Library = malloc(Bibliotheque.max_books * sizeof(Livre));
+
+    printf("Nom de la bibliothèque à charger ou créer : ");
+    fgets(Bibliotheque.myFile, sizeof(Bibliotheque.myFile), stdin);
+    Bibliotheque.myFile[strcspn(Bibliotheque.myFile, "\n")] = '\0';
+    chargerFichier(&Bibliotheque);
+    afficher_menu(&Bibliotheque);
+    free(Bibliotheque.Library);
+    return 0;
 }
+
+	
