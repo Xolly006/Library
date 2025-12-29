@@ -5,11 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-//vider le buffer après chaque scanf 
-void vider_buffer() {
-  int c;
-  while ((c = getchar()) != '\n' && c != EOF);
-} 
+
 void Simulation_temps(){
 	for(int i=0;i<3;i++){
 		printf(".");
@@ -18,91 +14,25 @@ void Simulation_temps(){
 	}
 	printf("Terminé!");
 }
-//sauvegarder en temps reel les caractéristiques des livres dans un fichier un peu comme un data base :
-void sauvegarderFichier(booksLibrary*Bibliotheque){
-	FILE*fichier=fopen(Bibliotheque->myFile,"w");
-	if(fichier==NULL){
-		printf("Erreur de lecture de %s",Bibliotheque->myFile);
-		return;
-	}
-	for(int i=0;i<Bibliotheque->nb_books;i++){
-		fprintf(
-			fichier ,"%d|%s|%s|%d|%d\n",
-			Bibliotheque->Library[i].id,
-			Bibliotheque->Library[i].titre,
-			Bibliotheque->Library[i].auteur,
-			Bibliotheque->Library[i].annee,
-			Bibliotheque->Library[i].available
-		);
-	}
-    fclose(fichier);
-	printf("Bibliothèque sauvegardée avec succès\n");
-}
-//charger le fichier sauvegardé
-void chargerFichier(booksLibrary*Bibliotheque){
-	FILE *fichier=fopen(Bibliotheque->myFile,"r");
-	if(fichier==NULL){
-		printf("Aucun fichier du nom %s existant création d'un nouveau fichier\n");
-		Bibliotheque->nb_books = 0;
-	    Bibliotheque->next_id=1;
-		return;
-	}
-	Bibliotheque->nb_books = 0;
-	Bibliotheque->next_id=1;
-	Livre b;
-	while(fscanf(fichier,"%d|%[^|]|%[^|]|%d|%d\n",&b.id,b.titre,b.auteur,&b.annee,&b.available)==5){
-		if(Bibliotheque->nb_books<Bibliotheque->max_books){
-			Bibliotheque->Library[Bibliotheque->nb_books]=b;
-            Bibliotheque->nb_books++;
-			if (b.id >= Bibliotheque->next_id){
-				Bibliotheque->next_id = b.id + 1;
-			} //calcul le plus grand id existant next_id doit être supp au plus grand id qui existe
-		}
-	}
-	fclose(fichier);
-	printf("%d livres charges depuis le fichier.\n", Bibliotheque->nb_books);
-}
+
 //fonction pour créer un livre à ajouter à la bibliohèque 
 Livre  saisir_livre(){
 	Livre book;
 	printf("=======------------NOUVEAU LIVRE------------=======\n");
 	printf("veuillez renseignez les caracteristiques du livre");
 	vider_buffer();
-	printf("titre du livre");
+	printf("titre du livre : ");
 	fgets(book.titre,sizeof(book.titre),stdin);
 	book.titre[strcspn(book.titre,"\n")]='\0';
-	printf("nom de l'auteur");
+	printf("nom de l'auteur : ");
 	fgets(book.auteur,sizeof(book.auteur),stdin);
 	book.auteur[strcspn(book.auteur,"\n")]='\0';
-	printf("année de parution");
+	printf("année de parution : ");
 	scanf("%d",&(book).annee);
 	vider_buffer();
 	return book;
 }
-//ajouter un livre à la bibliotheque 
-void addBookToLibrary(booksLibrary*Bibliotheque){
-	if(Bibliotheque->nb_books+1<=Bibliotheque->max_books){
-		Livre book=saisir_livre();
-		for (int i=0;i<Bibliotheque->nb_books;i++){
-			if(book.id==Bibliotheque->Library[i].id){
-				printf("ce livre existe déjà!,id déjà existant"); //eviter la duplication d'id;
-				return;
-			}
-		}
-		//ajouter le livre dans la bibliotheque
-		Bibliotheque->Library[Bibliotheque->nb_books]=book;
-		printf("Felicitation le livre %s a été ajouté à la bibliothque",Bibliotheque->Library[Bibliotheque->nb_books].titre);
-		Bibliotheque->Library[Bibliotheque->nb_books].available=true;
-		Bibliotheque->nb_books+=1;
-		Bibliotheque->Library[Bibliotheque->nb_books].id=Bibliotheque->next_id++;
-		//le nombre de livre a ainsi augmenté 
-		sauvegarderFichier(Bibliotheque);
 
-	}
-    else{
-		printf("capacité maximale atteinte impossible d'ajouter un nouveau livre.\n");	
-	}
-}
 //fonction pour afficher la bibliotheque et les livres dispo 
 void afficherLivresDisponibles(booksLibrary *Bibliotheque) {
 	printf("--- Liste des livres disponibles ---\n");
@@ -135,51 +65,84 @@ void afficher_livre(Livre book) {
     printf("------------------------\n");
 }
 //fonction de recherche par titre 
-void researchByTitle(booksLibrary *Bibliotheque,char*titre){
+int researchByTitle(booksLibrary *Bibliotheque,char*titre,int *id_trouve){
 	int trouve=0;
+	int ids=0;
 	for (int i=0;i<Bibliotheque->nb_books;i++){
 		if (strstr(Bibliotheque->Library[i].titre, titre) != NULL){
-			afficher_livre(Bibliotheque->Library[i]);
+			id_trouve[trouve]=Bibliotheque->Library[i].id; 
 			trouve++;
 		}//strstr plus polyvalent pour les recherches
 	}
-	if (!trouve){
-		printf("Aucun livre trouvé ! \n");
-	}
+	return trouve;
 }
+
 // rechercher par auteur 
-void resarchByAutor(booksLibrary *Bibliotheque,char*Autor){
+int resarchByAutor(booksLibrary *Bibliotheque,char*Autor,int* id_trouve){
 	int trouve=0;
 	for (int i=0;i<Bibliotheque->nb_books;i++){
 		if(strstr(Bibliotheque->Library[i].auteur, Autor) != NULL){
-			afficher_livre(Bibliotheque->Library[i]);
+			id_trouve[trouve]=Bibliotheque->Library[i].id;
 			trouve++;
 		}
 	}
-	if(!trouve){
-		printf("Aucun livre ne correspond à cet auteur !\n");
-	}
+	return trouve;
 }
+
 // rechercher par id ?
-void researchbyId(booksLibrary *Bibliotheque ,int id ){
+int researchbyId(booksLibrary *Bibliotheque ,int id,int* id_trouve ){
 	int trouve=0;
 	for(int i=0;i<Bibliotheque->nb_books;i++){
 		if (Bibliotheque->Library[i].id==id){
-			afficher_livre(Bibliotheque->Library[i]);
-			trouve++;
+			id_trouve[0]=Bibliotheque->Library[i].id;
+		}
+		return 1;//un livre trouvé unicité de l'id
+	}
+	return 0;
+}
+
+//fonction pour lier l'index aux identifiants dans la bibliotheque 
+int researchIndexByid(booksLibrary *Bibliotheque ,int id ){
+	for(int i=0;i<Bibliotheque->nb_books;i++){
+		if(Bibliotheque->Library[i].id==id){
+			return i;
 		}
 	}
-	if (!trouve){
-     	printf("aucun id correspondant vous pouvez toujours reessayer\n");
-	}
+	return -1;
 }
-void research(booksLibrary *Bibliotheque){
+
+void afficherLivrestrouves(booksLibrary*Bibliotheque,int trouve,int*id_trouve){
+	printf("\n=== Résultats trouvés : %d livre(s) ===\n", trouve);
+	for(int i=0;i<trouve;i++){
+		int index=researchIndexByid(Bibliotheque,id_trouve[i]);
+		 if (index != -1) {
+            printf("\n[%d] ID: %d | %s | %s | %d\n", 
+                   i + 1,  // Numéro de 1 à N
+                   Bibliotheque->Library[index].id,
+                   Bibliotheque->Library[index].titre,
+                   Bibliotheque->Library[index].auteur,
+                   Bibliotheque->Library[index].annee);
+            
+            if (!Bibliotheque->Library[index].available) {
+                printf("    ⚠️  Déjà emprunté\n");
+            }
+        }
+    }
+    printf("\n");
+
+}
+
+int research(booksLibrary *Bibliotheque,int *id_trouve){
 	int research_value;
+	int trouve=0;
 	printf(":::::Rechercher par genre:::::");
-	printf("vous pouvez rechercher suivant :1- le titre, 2-les noms des auteurs ,//3-l'année de parution  nous intégrerons bientôt un système qui donnera le resultat le plus optimal");
-	printf("rechercher");
-	scanf("%d",&research_value);
-	vider_buffer();
+	printf("\n::::: Rechercher par genre :::::\n");
+    printf("1 - Par titre\n");
+    printf("2 - Par auteur\n");
+    printf("3 - Par ID\n");
+    printf("Votre choix : ");
+    scanf("%d", &research_value);
+    vider_buffer();
 	switch(research_value){
 		case 1:{
 			Simulation_temps();
@@ -188,8 +151,8 @@ void research(booksLibrary *Bibliotheque){
 			printf("Entrez le titre: ");
 			fgets (title,sizeof(title),stdin);
 			title[strcspn(title,"\n")]='\0';
-			researchByTitle(Bibliotheque,title);
-			break;
+			trouve=researchByTitle(Bibliotheque,title,id_trouve);
+
 		}
 		case 2:{
 			Simulation_temps();
@@ -198,23 +161,30 @@ void research(booksLibrary *Bibliotheque){
 			printf("Entrez le nom de l'auteur : ");
 			fgets(Autor,sizeof(Autor),stdin);
 			Autor[strcspn(Autor,"\n")]='\0';
-			resarchByAutor(Bibliotheque,Autor);
+			trouve=resarchByAutor(Bibliotheque,Autor,id_trouve);
 			break;
 	    }
-		case 3:{ //seulement et sûrement pour les admin 
+		case 3:{ 
+			Simulation_temps();
 			printf("une recherche par id ? interessant ");
 			int id;
 			printf("Entrez l'identifiant unique du livre :");
 			scanf("%d",&id);
 			vider_buffer();
-			researchbyId(Bibliotheque,id);
+			trouve=researchbyId(Bibliotheque,id,id_trouve);
 			break;
 		}
 		default:
-		printf("De nouvaux paramètres seront ajoutés plus tard merci de vous contenter de ceux disponibles pour le moment \n");
+		printf("Faites un choix valide!\n");
 		break;
-		
+		if(trouve==0){
+			printf("Aucun resultat trouvé");
+		}
+		else{
+			afficherLivrestrouves(Bibliotheque,trouve,id_trouve);
+		}
 	}
+	return trouve;
 }
 //fonction d'emprunt de livre 
 void book_emprunt(Livre* book,booksLibrary*Bibliotheque){
@@ -232,21 +202,15 @@ void book_remise(Livre *book,booksLibrary *Bibliotheque){
 	printf("Merci le livre a été rendu\n ");
 	sauvegarderFichier(Bibliotheque);
 }
-//fonction pour lier l'index aux identifiants dans la bibliotheque 
-int researchIndexByid(booksLibrary *Bibliotheque ,int id ){
-	for(int i=0;i<Bibliotheque->nb_books;i++){
-		if(Bibliotheque->Library[i].id==id){
-			return i;
-		}
-	}
-	return -1;
-}
 
 //menu principal
 //menu principal de la bibliothéque.
 void  afficher_menu(booksLibrary *Bibliotheque){
 	int options=0;
 	while(options != 5) {
+		       printf("\n╔════════════════════════════════════════╗\n");
+        printf("║         MENU BIBLIOTHÈQUE             ║\n");
+        printf("╚════════════════════════════════════════╝\n");
         printf("\n--- MENU ---\n");
         printf("1. Ajouter un livre\n");
         printf("2. Afficher les livres\n");
@@ -264,39 +228,68 @@ void  afficher_menu(booksLibrary *Bibliotheque){
 					break ;
 				}
 				case 2:{
-					printf("très bien ,voici la bibliothèque!");
+					printf("très bien ,voici la bibliothèque!\n");
 					afficherLivresDisponibles(Bibliotheque);
 					break ;
 				}
 				case 3:{
-					printf("okay!recherchons ce livre");
-					research(Bibliotheque);
-					int choix;
-					printf("Souhaitez vous emprunter ce livre ? 1-oui 2-non");
-					scanf("%d",&choix);
-					vider_buffer();
-					if(choix==1){
-						printf("vous avez maintenant l'id du livre grâce à votre recherche vous pouvez l'emprunter");
-						int id ;
-						int index=-1;
+					int id_trouve[100];
+					int trouve=research(Bibliotheque,id_trouve);
+					if(trouve==0){
+						break;
+					}
+					char choix[50];
+					printf("voulez vous emprunter un livre ? : ");
+					fgets(choix,sizeof(choix),stdin);
+					choix[strcspn(choix,"\n")]='\0';
+					if(strcp(choix,"oui")!=0){
+						printf("Bye");
+						break;
+					}
+					int choix_numero;
+					int id_choisi;
+					int index=-1;
+					if(trouve==1){
+						id_choisi=id_trouve[0];
+						printf("Selection automatique de l'unique livre");
+					}
+					//au cas où il y a plusieurs livres
+				    else{
 						do{
-							printf("entrez l'id s'il vous plaît :");
-							scanf("%d",&id);
+							printf("Quel live voulez-vous emprunter (1-%d) 0 pour annulez: ",trouve);
+							scanf("%d",&choix_numero);
 							vider_buffer();
-							index=researchIndexByid(Bibliotheque,id);
-							if(index==-1){
-								printf("reessayer");
+							if(choix_numero==0){
+								break;
 							}
-						}while(index==-1);
-						if(index!=-1){
-							book_emprunt(&Bibliotheque->Library[index]);
-							printf("N'oublier pas de rendre le livre plus tard \n");
-						}
+							if(0<choix_numero||choix_numero>trouve){
+								printf("Faites un choix valide!\n");
+								continue;
+							}
+							id_choisi=id_trouve[choix_numero-1];
+
+						}while(1);
 					}
-					else{
-						printf("Très bien ");
-						break ;
+					if(id_choisi==-1){
+						break;
 					}
+					index=researchIndexByid(Bibliotheque,id_choisi);
+					if(index==-1){
+						printf("Erruer:Livre non trouvé");
+							break;
+					}
+					printf("\n=== Vous avez sélectionné ===\n");
+					afficher_livre(Bibliotheque->Library[index]);
+					printf("Emprunter ce livre?\n");
+					printf("1-oui\n");
+					printf("2-non\n");
+					fgets(choix,sizeof(choix),stdin);
+					choix[strcspn(choix,"\n")]='\0';
+					if(choix!="oui"){
+						printf("okay");
+						break;
+					}
+					book_emprunt(&Bibliotheque->Library[index],Bibliotheque);
 					break;
 				}
 				case 4:{
@@ -304,7 +297,7 @@ void  afficher_menu(booksLibrary *Bibliotheque){
 					int id;
 					int index=-1;
 					do{
-						printf("Entrez l'id du livre que vous souhaitez rendre (Entrez 0 si vous voulez sortir du code )");
+						printf("Entrez l'id du livre que vous souhaitez rendre \n(Entrez 0 si vous voulez sortir du code )\n");
 						scanf("%d",&id);
 						vider_buffer();
 						if(id==0){
@@ -316,7 +309,7 @@ void  afficher_menu(booksLibrary *Bibliotheque){
 						}
 					}while(index==-1);
 					if(index!=-1){
-						book_remise(&Bibliotheque->Library[index]);
+						book_remise(&Bibliotheque->Library[index],Bibliotheque);
 						printf("Merci et au-revoir");
 					}//nous lions l'index et l'identifions ainsi grâce à researchindexbyid la fonction retourne l'index (la position du livre ) grâce à son identifiant 
 				break;

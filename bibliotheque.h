@@ -37,11 +37,11 @@
 	//les fonctions pour la bibliothèque
 	void addBookToLibrary(booksLibrary*Bibliotheque);
 	void afficherLivresDisponibles(booksLibrary *Bibliotheque) ;
-    void researchByTitle(booksLibrary *Bibliotheque,char*titre);
-	void resarchByAutor(booksLibrary *Bibliotheque,char*Autor);
-	void researchbyId(booksLibrary *Bibliotheque ,int id );//pas evident que tout le monde arrive à s'en servir garder un id c'est plutôt complexe
+    int researchByTitle(booksLibrary *Bibliotheque,char*titre,int* id_trouve);
+	int resarchByAutor(booksLibrary *Bibliotheque,char*Autor,int*id_trouve);
+	int researchbyId(booksLibrary *Bibliotheque ,int id,int *id_trouve );//pas evident que tout le monde arrive à s'en servir garder un id c'est plutôt complexe
 	//plus tard je créerai un générateur d'id random mais je ne pense pas trop que ce sera utile 
-	void research(booksLibrary *Bibliotheque);
+	int research(booksLibrary *Bibliotheque,int*id_trouve);
     int researchIndexByid(booksLibrary *Bibliotheque ,int id );
 
     //menu principal
