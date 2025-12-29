@@ -6,7 +6,7 @@
 #include "bibliotheque.h"
 int main() {
     booksLibrary Bibliotheque;
-    printf("Nombre maximal e livre dans la bibliothèque :");
+    printf("Nombre maximal de livre dans la bibliothèque :");
 	scanf("%d",&Bibliotheque.max_books);
 	vider_buffer();
     Bibliotheque.Library = malloc(Bibliotheque.max_books * sizeof(Livre));

@@ -53,5 +53,5 @@ void chargerFichier(booksLibrary*Bibliotheque){
 		}
 	}
 	fclose(fichier);
-	printf("%d livres charges depuis le fichier.\n", Bibliotheque->nb_books);
+	printf("%d livres chargés depuis le fichier.\n", Bibliotheque->nb_books);
 }

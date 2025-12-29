@@ -19,8 +19,7 @@ void Simulation_temps(){
 Livre  saisir_livre(){
 	Livre book;
 	printf("=======------------NOUVEAU LIVRE------------=======\n");
-	printf("veuillez renseignez les caracteristiques du livre");
-	vider_buffer();
+	printf("veuillez renseignez les caracteristiques du livre\n");
 	printf("titre du livre : ");
 	fgets(book.titre,sizeof(book.titre),stdin);
 	book.titre[strcspn(book.titre,"\n")]='\0';
@@ -135,7 +134,6 @@ void afficherLivrestrouves(booksLibrary*Bibliotheque,int trouve,int*id_trouve){
 int research(booksLibrary *Bibliotheque,int *id_trouve){
 	int research_value;
 	int trouve=0;
-	printf(":::::Rechercher par genre:::::");
 	printf("\n::::: Rechercher par genre :::::\n");
     printf("1 - Par titre\n");
     printf("2 - Par auteur\n");
@@ -146,16 +144,18 @@ int research(booksLibrary *Bibliotheque,int *id_trouve){
 	switch(research_value){
 		case 1:{
 			Simulation_temps();
+			printf("\n");
 			printf("très bien vous rechercher par le titre ");
 			char title[50];
 			printf("Entrez le titre: ");
 			fgets (title,sizeof(title),stdin);
 			title[strcspn(title,"\n")]='\0';
 			trouve=researchByTitle(Bibliotheque,title,id_trouve);
-
+			break;
 		}
 		case 2:{
 			Simulation_temps();
+			printf("\n");
 			printf("très bien vous rechercher par l'auteur plutôt cultivé je l'admet ");
 			char Autor[50];
 			printf("Entrez le nom de l'auteur : ");
@@ -166,6 +166,7 @@ int research(booksLibrary *Bibliotheque,int *id_trouve){
 	    }
 		case 3:{ 
 			Simulation_temps();
+			printf("\n");
 			printf("une recherche par id ? interessant ");
 			int id;
 			printf("Entrez l'identifiant unique du livre :");
@@ -174,16 +175,19 @@ int research(booksLibrary *Bibliotheque,int *id_trouve){
 			trouve=researchbyId(Bibliotheque,id,id_trouve);
 			break;
 		}
-		default:
-		printf("Faites un choix valide!\n");
-		break;
-		if(trouve==0){
-			printf("Aucun resultat trouvé");
-		}
-		else{
-			afficherLivrestrouves(Bibliotheque,trouve,id_trouve);
+		default:{
+			printf("Faites un choix valide!\n");
+		    break;
 		}
 	}
+
+	if(trouve==0){
+		printf("Aucun resultat trouvé");
+	}
+	else{
+		afficherLivrestrouves(Bibliotheque,trouve,id_trouve);
+	}
+	
 	return trouve;
 }
 //fonction d'emprunt de livre 
@@ -223,7 +227,7 @@ void  afficher_menu(booksLibrary *Bibliotheque){
 	
 			switch (options){
 				case 1:{
-					printf(":::chargement...:::");
+					printf(":::chargement:::\n");
 					addBookToLibrary(Bibliotheque);
 					break ;
 				}
@@ -242,12 +246,12 @@ void  afficher_menu(booksLibrary *Bibliotheque){
 					printf("voulez vous emprunter un livre ? : ");
 					fgets(choix,sizeof(choix),stdin);
 					choix[strcspn(choix,"\n")]='\0';
-					if(strcp(choix,"oui")!=0){
+					if(strcmp(choix,"oui")!=0){
 						printf("Bye");
 						break;
 					}
-					int choix_numero;
-					int id_choisi;
+					int choix_numero=-1;
+					int id_choisi=-1;
 					int index=-1;
 					if(trouve==1){
 						id_choisi=id_trouve[0];
@@ -255,37 +259,38 @@ void  afficher_menu(booksLibrary *Bibliotheque){
 					}
 					//au cas où il y a plusieurs livres
 				    else{
-						do{
+						while(choix_numero!=0){
 							printf("Quel live voulez-vous emprunter (1-%d) 0 pour annulez: ",trouve);
 							scanf("%d",&choix_numero);
 							vider_buffer();
 							if(choix_numero==0){
 								break;
 							}
-							if(0<choix_numero||choix_numero>trouve){
+							if(choix_numero<1||choix_numero>trouve){
 								printf("Faites un choix valide!\n");
 								continue;
 							}
 							id_choisi=id_trouve[choix_numero-1];
-
-						}while(1);
+							break;
+						}
 					}
 					if(id_choisi==-1){
 						break;
 					}
 					index=researchIndexByid(Bibliotheque,id_choisi);
 					if(index==-1){
-						printf("Erruer:Livre non trouvé");
-							break;
+						printf("Erreur:Livre non trouvé");
+						break;
 					}
 					printf("\n=== Vous avez sélectionné ===\n");
 					afficher_livre(Bibliotheque->Library[index]);
 					printf("Emprunter ce livre?\n");
-					printf("1-oui\n");
-					printf("2-non\n");
+					printf("oui\n");
+					printf("non\n");
+					printf("votre choix : ");
 					fgets(choix,sizeof(choix),stdin);
 					choix[strcspn(choix,"\n")]='\0';
-					if(choix!="oui"){
+					if(strcmp(choix,"oui")!=0){
 						printf("okay");
 						break;
 					}

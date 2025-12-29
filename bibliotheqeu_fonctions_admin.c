@@ -10,7 +10,7 @@ void addBookToLibrary(booksLibrary*Bibliotheque){
 		Livre book=saisir_livre();
 		//ajouter le livre dans la bibliotheque
 		Bibliotheque->Library[Bibliotheque->nb_books]=book;
-		printf("Felicitation le livre %s a été ajouté à la bibliothque",Bibliotheque->Library[Bibliotheque->nb_books].titre);
+		printf("Felicitation le livre %s a été ajouté à la bibliothque\n",Bibliotheque->Library[Bibliotheque->nb_books].titre);
 		Bibliotheque->Library[Bibliotheque->nb_books].id=Bibliotheque->next_id++;
 		Bibliotheque->Library[Bibliotheque->nb_books].available=true;
 		Bibliotheque->nb_books+=1;
