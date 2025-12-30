@@ -16,6 +16,9 @@ void sauvegarderFichier(booksLibrary*Bibliotheque){
 		printf("Erreur de lecture de %s",Bibliotheque->myFile);
 		return;
 	}
+	//sauvegarder la taille maximale
+	fprintf(fichier,"%d\n",Bibliotheque->max_books);
+	//sauvegarder les livres 
 	for(int i=0;i<Bibliotheque->nb_books;i++){
 		fprintf(
 			fichier ,"%d|%s|%s|%d|%d\n",
@@ -27,31 +30,43 @@ void sauvegarderFichier(booksLibrary*Bibliotheque){
 		);
 	}
     fclose(fichier);
-	printf("Bibliothèque sauvegardée avec succès\n");
+	printf(">>Bibliothèque sauvegardée avec succès\n");
 }
 //charger le fichier sauvegardé
-void chargerFichier(booksLibrary*Bibliotheque){
+int chargerFichier(booksLibrary*Bibliotheque){
 	FILE *fichier=fopen(Bibliotheque->myFile,"r");
 	if(fichier==NULL){
 		printf("Aucun fichier du nom %s existant création d'un nouveau fichier\n",Bibliotheque->myFile);
-		Bibliotheque->nb_books = 0;
-	    Bibliotheque->next_id=1;
-		return;
+		return 0;
+	}
+	if(fscanf(fichier,"%d\n",&Bibliotheque->max_books)!=1){
+		printf("Erreur:fichier corrompu ou vide");
+		fclose(fichier);
+		return 0;
+	}
+	Bibliotheque->Library=malloc(Bibliotheque->max_books*sizeof(Livre));
+	if(!Bibliotheque->Library){
+		printf("erreur d'allocation mémoire");
+		fclose(fichier);
+		return 0;
 	}
 	Bibliotheque->nb_books = 0;
 	Bibliotheque->next_id=1;
 	Livre b;
 	int temp;
+	//scanf extreme pour lire jusqu'au delimiteurs
 	while(fscanf(fichier,"%d|%[^|]|%[^|]|%d|%d\n",&b.id,b.titre,b.auteur,&b.annee,&temp)==5){
 		b.available=temp?true:false;
 		if(Bibliotheque->nb_books<Bibliotheque->max_books){
 			Bibliotheque->Library[Bibliotheque->nb_books]=b;
             Bibliotheque->nb_books++;
+			// Mettre à jour next_id pour qu'il soit toujours supérieur au plus grand ID
 			if (b.id >= Bibliotheque->next_id){
 				Bibliotheque->next_id = b.id + 1;
-			} //calcul le plus grand id existant next_id doit être supp au plus grand id qui existe
+			}
 		}
 	}
 	fclose(fichier);
 	printf("%d livres chargés depuis le fichier.\n", Bibliotheque->nb_books);
+	return 1;
 }

@@ -26,7 +26,7 @@
 	
 	//les fonctions de sauvegarde
 	void sauvegarderFichier(booksLibrary*Bibliotheque);
-	void chargerFichier(booksLibrary*Bibliotheque);
+	int chargerFichier(booksLibrary*Bibliotheque);
 
 	//les fonctions liées au livre
     Livre  saisir_livre();
